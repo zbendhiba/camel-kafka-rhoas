@@ -1,0 +1,112 @@
+= camel-kafka-rhoas project
+
+This project uses Quarkus, the Supersonic Subatomic Java Framework.
+It produces and consumes Kafka messages using camel-quarkus-kafka extension.
+
+This example shows how to use Red Hat OpenShift Streams for Apache Kafka using RHOAS on Openshift.
+
+== Running the application in dev mode
+
+You can run your application in dev mode that enables live coding using:
+
+[source,shell script]
+----
+./mvnw compile quarkus:dev
+
+----
+
+____
+
+*_NOTE:_*  The dev mode uses Quarkus DevServices, that starts testContainers for development mode. We'll be using the Red Hat OpenShift Streams for Apache Kafka after deploying to Openshift.
+
+____
+
+
+==== Prerequisites
+Before deploying the application to Openshift cluster, you'd need to follow these steps:
+
+- Setup an instance and your topic named `Test`, you can follow up the https://cloud.redhat.com/beta/application-services/streams/resources[UI quickstart] or use the https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka/1/guide/f520e427-cad2-40ce-823d-96234ccbc047[rhoas CLI].
+- Install https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka/1/guide/f520e427-cad2-40ce-823d-96234ccbc047#_8818f0d5-ae20-42c8-9622-a98e663ff1a8[RHOAS cli]
+- In the openshift cluster, install these 2 operators: https://github.com/redhat-developer/service-binding-operator/blob/master/README.md[Service Binding Operator] and https://github.com/redhat-developer/app-services-operator/tree/main/docs[RHOAS Operator]
+- https://access.redhat.com/documentation/en-us/red_hat_openshift_streams_for_apache_kafka/1/guide/f520e427-cad2-40ce-823d-96234ccbc047#_e081dde5-54e8-4cd2-81e5-4a53bf1f4338[Login to your Red Hat OpenShift Streams for Apache Kafka account using RHOAS cli].
+----
+$ rhoas login
+----
+- Connect to Openshift cluster, and select the proper Openshift project and the proper Kafka instance.
+----
+$ rhoas cluster connect
+----
+
+- Check that the KafkaConnection has been created successfully in the cluster.
+----
+$ oc get KafkaConnection
+NAME   AGE
+test   35s
+----
+
+==== Deploy on openshift
+
+----
+$ mvn clean package -DskipTests -Dquarkus.kubernetes.deploy=true
+----
+
+The pods should be failing, because the kafka instance is not deployed in the cluster, but Managed elsewhere.
+
+----
+$ oc get pods
+NAME                                           READY   STATUS   RESTARTS   AGE
+camel-kafka-rhoas-b4c77d76b-rjl8c   0/1     Error    1          9s
+----
+
+____
+
+*_NOTE:_*  To bind the application, we need a valid deployment. I use here a containerized version of my application using docker.
+
+____
+
+
+==== Bind the application using ServiceBinding Resource
+
+You can create the ServiceBinding resource by updating the `conf/kafka-binding.yaml`. Make sure the namespace corresponds to your current openshift project.
+
+----
+$ oc apply -f conf/kafka-binding.yaml
+servicebinding.binding.operators.coreos.com/kafka-config created
+----
+
+Check the container has been regenerated and that the new pod is not failing anymore.
+----
+$ oc get pods
+NAME                                           READY   STATUS    RESTARTS   AGE
+camel-kafka-rhoas-67b5494fc-xqzd7   1/1     Running   0          6m16s
+----
+
+==== Bind the application using RHOAS cli
+
+To bind the Kafka instance to the camel-quarkus-example-kafka project, use the `rhoas cluster bind` and select the camel-quarkus-example-kafka project from the list.
+----
+$ rhoas cluster bind
+----
+The application is visible while attempting to bind, due to the https://quarkus.io/guides/deploying-to-kubernetes#service-binding[Quarkus service binding extension].
+----
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-kubernetes-service-binding</artifactId>
+</dependency>
+----
+
+Select the app. Check the container has been regenerated and that the new pod is not failing anymore.
+----
+$ oc get pods
+NAME                                           READY   STATUS    RESTARTS   AGE
+camel-kafka-rhoas-67b5494fc-xqzd7   1/1     Running   0          6m16s
+----
+
+
+==== Clean-up
+To clean up do.
+
+[source,shell]
+----
+$ oc delete all -l app.kubernetes.io/name=camel-kafka-rhoas
+----

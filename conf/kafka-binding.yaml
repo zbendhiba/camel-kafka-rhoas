@@ -1,0 +1,18 @@
+apiVersion: binding.operators.coreos.com/v1alpha1
+kind: ServiceBinding
+metadata:
+  name: kafka-config
+  namespace: managed-kafka
+spec:
+  application:
+    group: apps
+    name: camel-kafka-rhoas
+    resource: deployments
+    version: v1
+
+  bindAsFiles: true
+  services:
+    - group: rhoas.redhat.com
+      version: v1alpha1
+      kind: KafkaConnection
+      name: test
