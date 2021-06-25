@@ -81,6 +81,14 @@ NAME                                           READY   STATUS    RESTARTS   AGE
 camel-kafka-rhoas-67b5494fc-xqzd7   1/1     Running   0          6m16s
 ----
 
+To clean up do.
+
+[source,shell]
+----
+$ oc delete all -l app.kubernetes.io/name=camel-kafka-rhoas
+$ oc delete  ServiceBinding/kafka-config
+----
+
 ==== Bind the application using RHOAS cli
 
 To bind the Kafka instance to the camel-quarkus-example-kafka project, use the `rhoas cluster bind` and select the camel-quarkus-example-kafka project from the list.
@@ -102,11 +110,10 @@ NAME                                           READY   STATUS    RESTARTS   AGE
 camel-kafka-rhoas-67b5494fc-xqzd7   1/1     Running   0          6m16s
 ----
 
-
-==== Clean-up
 To clean up do.
 
 [source,shell]
 ----
 $ oc delete all -l app.kubernetes.io/name=camel-kafka-rhoas
 ----
+

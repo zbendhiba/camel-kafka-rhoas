@@ -222,38 +222,5 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>kubernetes</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-        <property>
-          <name>kubernetes</name>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>io.quarkus</groupId>
-          <artifactId>quarkus-kubernetes</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>io.quarkus</groupId>
-          <artifactId>quarkus-container-image-jib</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>openshift</id>
-      <activation>
-        <property>
-          <name>openshift</name>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>io.quarkus</groupId>
-          <artifactId>quarkus-openshift</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
   </profiles>
 </project>
